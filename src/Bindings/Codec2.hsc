@@ -16,3 +16,10 @@ import Foreign.Ptr
 #ccall codec2_set_lpc_post_filter , Ptr <struct CODEC2> -> CInt -> CInt -> CFloat -> CFloat -> IO ()
 #ccall codec2_get_spare_bit_index , Ptr <struct CODEC2> -> IO CInt
 #ccall codec2_rebuild_spare_bit , Ptr <struct CODEC2> -> Ptr CInt -> IO CInt
+
+#num CODEC2_MODE_3200
+#num CODEC2_MODE_2400
+#num CODEC2_MODE_1600
+#num CODEC2_MODE_1400
+#num CODEC2_MODE_1300
+#num CODEC2_MODE_1200
