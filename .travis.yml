@@ -45,9 +45,9 @@ before_install:
   - sudo apt-get install libspeex-dev libspeexdsp-dev
 
   - |
-    git clone https://github.com/relrod/codec2.git
+    git clone https://github.com/relrod/codec2.git ~/codec2
+    pushd ~/codec2
     git checkout builderror
-    pushd codec2
     mkdir build_linux
     cd build_linux
     cmake ..
