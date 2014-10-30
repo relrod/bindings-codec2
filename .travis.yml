@@ -42,6 +42,8 @@ before_install:
       export PATH=$HOME/.cabal/bin:$PATH
     fi
 
+  - sudo apt-get install libspeex-dev libspeexdsp-dev
+
   - |
     git clone https://github.com/freedv/codec2.git
     pushd codec2
