@@ -52,7 +52,7 @@ before_install:
     cd build_linux
     cmake ..
     make
-    make install
+    sudo make install
     popd
 
 install:
