@@ -6,7 +6,6 @@ import Data.Binary.Put
 import qualified Data.ByteString.Lazy.Char8 as L
 import Data.List.Split (chunksOf)
 import Foreign.C.Types
-import Foreign.C.String
 import Foreign.Marshal.Alloc
 import Foreign.Marshal.Array
 import Foreign.Ptr
@@ -20,16 +19,16 @@ main = do
   nsam <- c'codec2_samples_per_frame codec2
   nbit <- c'codec2_bits_per_frame codec2
   buf <- mallocBytes $ sizeOf (0 :: CShort) * fromIntegral nsam :: IO (Ptr CShort)
-  let nbyte = floor $ fromIntegral (nbit + 7) / 8 :: Int
+  let nbyte = floor $ (fromIntegral (nbit + 7) / 8 :: Float) :: Int
   bits <- mallocBytes $ sizeOf (0 :: CUChar) * fromIntegral nbyte :: IO (Ptr CUChar)
-  input <- L.readFile "/home/ricky/rpmbuild/BUILD/codec2-0.2.svn1324/wav/hts2a_g729a.wav"
+  input <- L.readFile "/home/ricky/rpmbuild/BUILD/codec2-0.2.svn1324/raw/hts2a_g729a.raw"
   let samps = runGet getSamples input
   mapM_ (\x -> c2encode codec2 x buf bits nbyte) (chunksOf (fromIntegral nsam) samps)
 
 getSample :: Get CShort
 getSample = do
-  s <- get
-  return $! CShort s
+  s <- getWord16le
+  return $! CShort (fromIntegral s)
 
 getSamples :: Get [CShort]
 getSamples = do
@@ -38,8 +37,8 @@ getSamples = do
     then return []
     else do
       samp <- getSample
-      remaining <- getSamples
-      return (samp:remaining)
+      remaining' <- getSamples
+      return (samp:remaining')
 
 -- | TODO: Is there a better way to do this?
 putCUChar :: [CUChar] -> Put
@@ -56,9 +55,10 @@ c2encode :: Ptr C'CODEC2
          -> Int          -- ^ How big the result is
          -> IO ()
 c2encode codec2 frame poke' store nbyte = do
+  mapM_ (\x -> putStr $ show x ++ ", ") (take 20 frame)
   pokeArray poke' frame
   c'codec2_encode codec2 store poke'
   -- And, for testing:
   written <- peekArray nbyte store
   let bs = runPut $ putCUChar written
-  L.appendFile "/tmp/output.raw" bs
+  L.appendFile "/tmp/output.c2" bs
