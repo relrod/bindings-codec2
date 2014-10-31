@@ -63,7 +63,7 @@ script:
   - $CABAL build
   - $CABAL install
   - bindings-codec2-demo ~/codec2/raw/hts2a_g729a.raw /tmp/hts2a_g729a.haskell.c2
-  - ~/codec2/build_linux/src/c2enc 3200 /~/codec2/raw/hts2a_g729a.raw /tmp/hts2a_g729a.upstream.c2
+  - ~/codec2/build_linux/src/c2enc 3200 ~/codec2/raw/hts2a_g729a.raw /tmp/hts2a_g729a.upstream.c2
   - |
     function x() {
       hash1="$(sha512sum /tmp/hts2a_g729a.haskell.c2 | awk '{print $1}')"
