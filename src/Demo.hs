@@ -55,7 +55,6 @@ c2encode :: Ptr C'CODEC2
          -> Int          -- ^ How big the result is
          -> IO ()
 c2encode codec2 frame poke' store nbyte = do
-  mapM_ (\x -> putStr $ show x ++ ", ") (take 20 frame)
   pokeArray poke' frame
   c'codec2_encode codec2 store poke'
   -- And, for testing:
