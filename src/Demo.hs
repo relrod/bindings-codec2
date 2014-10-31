@@ -11,9 +11,11 @@ import Foreign.Marshal.Array
 import Foreign.Ptr
 import Foreign.Storable
 import Bindings.Codec2
+import System.Environment
 
 main :: IO ()
 main = do
+  (fin:fout:_) <- getArgs
   let mode = c'CODEC2_MODE_3200
   codec2 <- c'codec2_create mode
   nsam <- c'codec2_samples_per_frame codec2
@@ -21,9 +23,9 @@ main = do
   buf <- mallocBytes $ sizeOf (0 :: CShort) * fromIntegral nsam :: IO (Ptr CShort)
   let nbyte = floor $ (fromIntegral (nbit + 7) / 8 :: Float) :: Int
   bits <- mallocBytes $ sizeOf (0 :: CUChar) * fromIntegral nbyte :: IO (Ptr CUChar)
-  input <- L.readFile "/home/ricky/rpmbuild/BUILD/codec2-0.2.svn1324/raw/hts2a_g729a.raw"
+  input <- L.readFile fin
   let samps = runGet getSamples input
-  mapM_ (\x -> c2encode codec2 x buf bits nbyte) (chunksOf (fromIntegral nsam) samps)
+  mapM_ (\x -> c2encode codec2 x buf bits nbyte fout) (chunksOf (fromIntegral nsam) samps)
 
 getSample :: Get CShort
 getSample = do
@@ -53,11 +55,12 @@ c2encode :: Ptr C'CODEC2
          -> Ptr CShort   -- ^ The pointer that the ['Word8'] above gets poked to.
          -> Ptr CUChar   -- ^ The pointer that codec2_encode should store in.
          -> Int          -- ^ How big the result is
+         -> String       -- ^ Output filename
          -> IO ()
-c2encode codec2 frame poke' store nbyte = do
+c2encode codec2 frame poke' store nbyte fout = do
   pokeArray poke' frame
   c'codec2_encode codec2 store poke'
   -- And, for testing:
   written <- peekArray nbyte store
   let bs = runPut $ putCUChar written
-  L.appendFile "/tmp/output.c2" bs
+  L.appendFile fout bs
